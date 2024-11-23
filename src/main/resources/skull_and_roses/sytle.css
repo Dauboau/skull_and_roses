@@ -1,0 +1,19 @@
+
+
+.button{
+    -fx-background-color: #EC008C;
+    -fx-border-width: 0px;
+}
+
+.button:hover { 
+  -fx-background-color: #009444;
+}
+
+.progress-bar {
+    -fx-accent: #461eb2;
+}
+
+.progress-bar > .track {
+    -fx-background-color: #461eb2;
+    -fx-opacity: 0.4;
+}
