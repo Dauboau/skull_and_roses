@@ -31,7 +31,7 @@
          </font></Button>
       <ImageView fx:id="imageView" fitHeight="300.0" fitWidth="300.0" preserveRatio="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
          <image>
-            <Image url="@p2S.png" />
+            <Image url="@PINK_SKULL.png" />
          </image>
       </ImageView>
    </children>
