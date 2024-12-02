@@ -9,4 +9,15 @@ public class GameController {
     private void switchToPrimary() throws IOException {
         App.setRoot("menu");
     }
+
+    /**
+     * The initialize method is called when the game starts.
+     */
+    @FXML
+    public void initialize() {
+
+        System.out.println("Game Controller Initialized");
+
+    }
+    
 }
