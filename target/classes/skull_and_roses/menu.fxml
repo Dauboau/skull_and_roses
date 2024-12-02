@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<GridPane fx:id="rootPane" style="-fx-background-color: #291c1a;" stylesheets="@sytle.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="skull_and_roses.PrimaryController">
+<GridPane fx:id="rootPane" style="-fx-background-color: #291c1a;" stylesheets="@sytle.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="skull_and_roses.MenuController">
    <columnConstraints>
       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="40.0" />
       <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" percentWidth="30.0" prefWidth="576.0" />
@@ -25,7 +25,7 @@
          <font>
             <Font name="SF Pro Text Regular" size="36.0" />
          </font></Label>
-      <Button fx:id="primaryButton" onAction="#switchToSecondary" text="Switch to Secondary View" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="2">
+      <Button fx:id="primaryButton" onAction="#switchToSecondary" text="Start" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="2">
          <font>
             <Font name="SF Pro Text Regular" size="24.0" />
          </font></Button>
