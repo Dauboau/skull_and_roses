@@ -12,7 +12,7 @@ public class Player {
         ZERO, ONE, PLAYER
     }
 
-    public Stack<Token> tokenStack;
+    public Stack<Token> tokenStack = new Stack<Token>();
     public String name;
     public Colour colour;
     public Type type;
