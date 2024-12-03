@@ -9,6 +9,7 @@ public class MenuController {
 
     @FXML
     private void switchToSecondary() throws IOException {
+        App.game = new Game(Game.Type.ZERO_vs_ZERO);
         App.setRoot("game");
     }
 
