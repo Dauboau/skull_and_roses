@@ -13,6 +13,7 @@ import java.io.IOException;
 public class App extends Application {
 
     public static Game game;
+    public static GameController gameController;
     private static Scene scene;
 
     @Override

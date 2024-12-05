@@ -11,7 +11,9 @@ public class Game {
 
     // 2 players setup
     public ArrayList<Player> players = new ArrayList<Player>(2);
-    public Integer bid = null;
+    public Integer bid = 0;
+
+    public int nTicks = 0;
 
     public Game(Type type) {
         setPlayers(type,"p1","p2","pink","blue");
@@ -58,25 +60,46 @@ public class Game {
 
     }
 
-    public void start() {
+    public Runnable start() {
+        return () -> {
+            System.out.println("Game Started: " + players.get(0).name + " vs " + players.get(1).name);
 
-        System.out.println("Game Started: " + players.get(0).name + " vs " + players.get(1).name);
+            int firstPlayer = ThreadLocalRandom.current().nextInt(0, 2);
 
-        int firstPlayer = ThreadLocalRandom.current().nextInt(0, 2);
+            System.out.println("First Player: " + players.get(firstPlayer).name);
 
-        System.out.println("First Player: " + players.get(firstPlayer).name);
+            this.stage_1(players.get(firstPlayer),players.get(1 - firstPlayer));
+        };
+    }
 
-        this.stage_1(players.get(firstPlayer),players.get(1 - firstPlayer));
+    public synchronized void tick() {
+        nTicks++;
+        notifyAll();
+    }
+
+    private synchronized void wait_tick(){
+
+        int nTicksAux = this.nTicks;
+        while (nTicksAux == this.nTicks) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
 
     }
 
     public void stage_1(Player player, Player opponent) {
+
+        wait_tick();
 
         Player.Actions1 action = player.play_1(opponent.tokenStack.size());
 
         System.out.println("Stage 1: " + player.name + " " + action);
         System.out.println("Player's token stack: " + player.tokenStack);
         System.out.println("Opponent's token stack: " + opponent.tokenStack);
+        App.gameController.updateLabels(bid,1,player.name,action.toString());
 
         if(action == Player.Actions1.BID){
             stage_2(opponent,player);
@@ -88,11 +111,14 @@ public class Game {
 
     public void stage_2(Player player, Player opponent){
 
+        wait_tick();
+
         Player.Actions2 action = player.play_2(opponent.tokenStack.size(),bid);
 
         System.out.println("Stage 2: " + player.name + " " + action + " " + bid);
         System.out.println("Player's token stack: " + player.tokenStack);
         System.out.println("Opponent's token stack: " + opponent.tokenStack);
+        App.gameController.updateLabels(bid,1,player.name,action.toString());
 
         if(action == Player.Actions2.CHALLENGE){
             stage_3(opponent,player);
