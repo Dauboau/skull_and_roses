@@ -2,8 +2,6 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
@@ -11,15 +9,16 @@
 
 <GridPane onMouseClicked="#tick_on_click" prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: #291c1a;" stylesheets="@sytle.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="skull_and_roses.GameController">
    <columnConstraints>
-      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
       <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" />
-      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" percentWidth="60.0" />
+      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" />
    </columnConstraints>
    <rowConstraints>
       <RowConstraints minHeight="10.0" percentHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" valignment="CENTER" vgrow="SOMETIMES" />
-      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" percentHeight="15.0" valignment="CENTER" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" percentHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
    </rowConstraints>
    <children>
         <Button fx:id="secondaryButton" onAction="#menu" text="Menu" textFill="WHITE" translateX="-20.0" GridPane.columnIndex="2" GridPane.halignment="RIGHT">
@@ -36,30 +35,28 @@
             <Font name="SF Pro Text Regular" size="36.0" />
          </font>
       </Label>
-      <Label fx:id="stageLabel" layoutX="165.0" layoutY="392.0" text="Stage: 1" textFill="WHITE" translateX="20.0" GridPane.halignment="LEFT">
+      <Label fx:id="stageLabel" layoutX="165.0" layoutY="392.0" text="Stage: 0" textFill="WHITE" translateX="20.0" GridPane.halignment="LEFT">
          <font>
             <Font name="SF Pro Text Regular" size="36.0" />
          </font>
       </Label>
-      <GridPane GridPane.columnIndex="1" GridPane.rowIndex="3">
+      <GridPane fx:id="p2Grid" GridPane.columnIndex="1" GridPane.rowIndex="3">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
         </columnConstraints>
-         <children>
-            <ImageView fitHeight="200.0" fitWidth="200.0">
-               <image>
-                  <Image url="@PINK_F.png" />
-               </image>
-            </ImageView>
-         </children>
          <rowConstraints>
-            <RowConstraints />
+            <RowConstraints valignment="CENTER" vgrow="ALWAYS" />
          </rowConstraints>
       </GridPane>
-      <GridPane layoutX="337.0" layoutY="519.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+      <Label fx:id="actionLabel" layoutX="91.0" layoutY="385.0" text="INCREASE_BID" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="2">
+         <font>
+            <Font name="SF Pro Text Regular" size="36.0" />
+         </font>
+      </Label>
+      <GridPane fx:id="p1Grid" GridPane.columnIndex="1" GridPane.rowIndex="1">
          <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -67,17 +64,15 @@
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
          </columnConstraints>
          <rowConstraints>
-            <RowConstraints />
+            <RowConstraints valignment="CENTER" vgrow="ALWAYS" />
          </rowConstraints>
-         <children>
-            <ImageView fitHeight="200.0" fitWidth="200.0" GridPane.rowIndex="1">
-               <image>
-                  <Image url="@BLUE_F.png" />
-               </image>
-            </ImageView>
-         </children>
       </GridPane>
-      <Label fx:id="actionLabel" layoutX="91.0" layoutY="385.0" text="INCREASE_BID" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="2">
+      <Label fx:id="p1" text="p1" textFill="WHITE" GridPane.rowIndex="1">
+         <font>
+            <Font name="SF Pro Text Regular" size="36.0" />
+         </font>
+      </Label>
+      <Label fx:id="p2" text="p2" textFill="WHITE" GridPane.rowIndex="3">
          <font>
             <Font name="SF Pro Text Regular" size="36.0" />
          </font>

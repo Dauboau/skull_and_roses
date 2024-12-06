@@ -7,6 +7,8 @@ import java.util.concurrent.Executors;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 
 public class GameController {
 
@@ -21,6 +23,18 @@ public class GameController {
 
     @FXML
     private Label actionLabel;
+
+    @FXML
+    private GridPane p1Grid;
+
+    @FXML
+    private Label p1;
+
+    @FXML
+    private GridPane p2Grid;
+
+    @FXML
+    private Label p2;
 
     @FXML
     private void menu() throws IOException {
@@ -41,11 +55,17 @@ public class GameController {
 
     @FXML
     public void tick_on_click(){
-        System.out.println("Tick");
         App.game.tick();
     }
 
-    public void updateLabels(int bid, int stage, String player, String action){
+    public void setPlayerLabels(String p1Name, String p2Name){
+        Platform.runLater(() -> {
+            p1.setText(p1Name);
+            p2.setText(p2Name);
+        });
+    }
+
+    public void updateLabels(int bid, String stage, String player, String action){
         Platform.runLater(() -> {
             bidLabel.setText("Bid: " + bid);
             stageLabel.setText("Stage: " + stage);
@@ -53,5 +73,42 @@ public class GameController {
             actionLabel.setText(action);
         });
     }
-    
+
+    public void addToken(ImageView token,int playerIndex, int tokenIndex){
+        Platform.runLater(() -> {
+            switch (playerIndex) {
+
+                case 0:
+                    p1Grid.add(token, tokenIndex, 0);
+                    break;
+
+                case 1:
+                    p2Grid.add(token, tokenIndex, 0);
+                    break;
+            
+                default:
+                    break;
+
+            }
+        });
+    }
+
+    public void removeToken(ImageView token, int playerIndex){
+        Platform.runLater(() -> {
+            switch (playerIndex) {
+
+                case 0:
+                    p1Grid.getChildren().remove(token);
+                    break;
+
+                case 1:
+                    p2Grid.getChildren().remove(token);
+                    break;
+            
+                default:
+                    break;
+
+            }
+        });
+    }
 }

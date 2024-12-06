@@ -3,6 +3,9 @@ import java.util.HashMap;
 import java.util.Stack;
 import java.util.concurrent.ThreadLocalRandom;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
 @SuppressWarnings("unchecked")
 
 public class Player {
@@ -19,6 +22,7 @@ public class Player {
     public static final int N_SKULLS = 1;
 
     public Stack<Token> tokenStack = new Stack<Token>();
+    private Stack<ImageView> tokenImageViewStack = new Stack<ImageView>();
     public int nRoses;
     public int nSkulls;
     public String name;
@@ -80,18 +84,81 @@ public class Player {
 
     }
 
+    private void pushToken(Token token){
+
+        this.tokenStack.push(token);
+
+        String url = "/skull_and_roses/" + this.colour + "_";
+        switch (App.game.type) {
+
+            case ZERO_vs_ZERO:
+            case ONE_vs_ZERO:
+
+                switch (token) {
+                    case ROSE:
+                        url += "F";
+                        break;
+                    case SKULL:
+                        url += "S";
+                        break;
+                }
+                break;
+
+            case PLAYER_vs_ZERO:
+            case PLAYER_vs_ONE:
+
+                if(this.type == Type.PLAYER){
+                    switch (token) {
+                        case ROSE:
+                            url += "F";
+                            break;
+                        case SKULL:
+                            url += "S";
+                            break;
+                    }
+                }else{
+                    url += "N";
+                }
+                break;
+
+        }
+        url += ".png";
+
+        Image tokenImage = new Image(getClass().getResource(url).toExternalForm());
+        ImageView tokenImageView = new ImageView(tokenImage);
+
+        tokenImageView.setPreserveRatio(true);
+        tokenImageView.setFitWidth(200);
+        tokenImageView.setTranslateX(-100);
+
+        this.tokenImageViewStack.push(tokenImageView);
+        App.gameController.addToken(tokenImageView, App.game.players.indexOf(this), tokenImageViewStack.size());
+
+    }
+
+    private Token popToken(){
+
+        Token token = this.tokenStack.pop();
+
+        ImageView tokenImageView = this.tokenImageViewStack.pop();
+        App.gameController.removeToken(tokenImageView, App.game.players.indexOf(this));
+
+        return token;
+
+    }
+
     public enum Actions1 {
         PLACE_SKULL, PLACE_FLOWER, BID
     }
 
     private Actions1 place_skull(){
-        this.tokenStack.push(Token.SKULL);
+        this.pushToken(Token.SKULL);
         this.nSkulls--;
         return Actions1.PLACE_SKULL;
     }
 
     private Actions1 place_flower(){
-        this.tokenStack.push(Token.ROSE);
+        this.pushToken(Token.ROSE);
         this.nRoses--;
         return Actions1.PLACE_FLOWER;
     }
@@ -124,8 +191,8 @@ public class Player {
                 
                 // If there are no skulls left, the player should bid or play a flower token (randonly)
                 // It may bid unless the last token is a skull
-                int randon = ThreadLocalRandom.current().nextInt(0, 2);
-                if(randon == 0 || this.tokenStack.peek() == Token.SKULL){
+                int randon = ThreadLocalRandom.current().nextInt(0, 3);
+                if(randon <= 1 || this.tokenStack.peek() == Token.SKULL){
                     return place_flower();
                 }else{
                     return bid();
@@ -134,10 +201,10 @@ public class Player {
             }else{
 
                 // Randomly choose an action with equal probability
-                int randon = ThreadLocalRandom.current().nextInt(0, 3);
+                int randon = ThreadLocalRandom.current().nextInt(0, 4);
                 if(randon == 0){
                     return place_skull();
-                }else if(randon == 1){
+                }else if(randon == 1 || randon == 2){
                     return place_flower();
                 }else{
                     return bid();
@@ -308,40 +375,29 @@ public class Player {
 
     }
 
-    public boolean play_3(Stack<Token> opponentStack, int bid){
+    public enum Actions3 {
+        TURN_ROSE, TURN_SKULL, TURN_NOTHING
+    }
 
-        int nRoses = 0;
-        Stack<Token> stackAux = (Stack<Token>)tokenStack.clone();
-        while(!stackAux.isEmpty()){
+    public Actions3 play_3(Player opponent){
 
-            if(stackAux.pop() == Token.ROSE){
-                nRoses++;
+        if(!tokenStack.isEmpty()){
+            if(this.popToken() == Token.ROSE){
+                return Actions3.TURN_ROSE;
             }else{
-                return false;
+                return Actions3.TURN_SKULL;
             }
-
-            if(nRoses >= bid){
-                return true;
-            }
-
         }
 
-        stackAux = (Stack<Token>)opponentStack.clone();
-        while(!stackAux.isEmpty()){
-
-            if(stackAux.pop() == Token.ROSE){
-                nRoses++;
+        if(!opponent.tokenStack.isEmpty()){
+            if(opponent.popToken() == Token.ROSE){
+                return Actions3.TURN_ROSE;
             }else{
-                return false;
+                return Actions3.TURN_SKULL;
             }
-
-            if(nRoses >= bid){
-                return true;
-            }
-
         }
 
-        return false;
+        return Actions3.TURN_NOTHING;
 
     }
 

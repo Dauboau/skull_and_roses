@@ -11,15 +11,18 @@ public class Game {
 
     // 2 players setup
     public ArrayList<Player> players = new ArrayList<Player>(2);
+    
     public Integer bid = 0;
-
     public int nTicks = 0;
+    public Type type;
 
     public Game(Type type) {
+        this.type = type;
         setPlayers(type,"p1","p2","pink","blue");
     }
 
     public Game(Type type, String p1, String p2, String c1, String c2) {
+        this.type = type;
         setPlayers(type, p1, p2, c1, c2);
     }
 
@@ -63,10 +66,12 @@ public class Game {
     public Runnable start() {
         return () -> {
             System.out.println("Game Started: " + players.get(0).name + " vs " + players.get(1).name);
+            App.gameController.setPlayerLabels(players.get(0).name,players.get(1).name);
 
             int firstPlayer = ThreadLocalRandom.current().nextInt(0, 2);
 
             System.out.println("First Player: " + players.get(firstPlayer).name);
+            App.gameController.updateLabels(bid,"0",players.get(firstPlayer).name,"FIRST_PLAYER");
 
             this.stage_1(players.get(firstPlayer),players.get(1 - firstPlayer));
         };
@@ -99,7 +104,7 @@ public class Game {
         System.out.println("Stage 1: " + player.name + " " + action);
         System.out.println("Player's token stack: " + player.tokenStack);
         System.out.println("Opponent's token stack: " + opponent.tokenStack);
-        App.gameController.updateLabels(bid,1,player.name,action.toString());
+        App.gameController.updateLabels(bid,"1",player.name,action.toString());
 
         if(action == Player.Actions1.BID){
             stage_2(opponent,player);
@@ -118,7 +123,7 @@ public class Game {
         System.out.println("Stage 2: " + player.name + " " + action + " " + bid);
         System.out.println("Player's token stack: " + player.tokenStack);
         System.out.println("Opponent's token stack: " + opponent.tokenStack);
-        App.gameController.updateLabels(bid,1,player.name,action.toString());
+        App.gameController.updateLabels(bid,"2",player.name,action.toString());
 
         if(action == Player.Actions2.CHALLENGE){
             stage_3(opponent,player);
@@ -130,17 +135,39 @@ public class Game {
 
     public void stage_3(Player player, Player opponent){
 
-        boolean playerWin = player.play_3(opponent.tokenStack,bid);
+        wait_tick();
 
-        System.out.println("Stage 3: " + player.name + " " + "was challenged(" + bid + ")!");
+        Player.Actions3 action = player.play_3(opponent);
+
+        if(action == Player.Actions3.TURN_ROSE){
+            // if a rose is turned, reduce the bid accordingly
+            bid--;
+        }
+
+        System.out.println("Stage 3: " + player.name + " " + action + " " + bid);
         System.out.println("Player's token stack: " + player.tokenStack);
         System.out.println("Opponent's token stack: " + opponent.tokenStack);
+        App.gameController.updateLabels(bid,"3",player.name,action.toString());
 
-        if(playerWin){
-            System.out.println("Winner: " + player.name);
-        }else{
-            System.out.println("Winner: " + opponent.name);
+        if(action != Player.Actions3.TURN_ROSE){
+            game_over(opponent,player);
+            return;
+        }else if(bid <= 0){
+            game_over(player,opponent);
+            return;
         }
+
+        stage_3(player,opponent);
+
+    }
+
+    public void game_over(Player winner, Player loser){
+
+        wait_tick();
+
+        System.out.println("Winner: " + winner.name);
+        System.out.println("Looser: " + loser.name);
+        App.gameController.updateLabels(bid,"4",winner.name,"WINNER");
 
     }
 
