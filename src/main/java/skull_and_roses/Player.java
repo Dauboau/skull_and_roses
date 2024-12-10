@@ -8,11 +8,7 @@ import javafx.scene.image.ImageView;
 
 @SuppressWarnings("unchecked")
 
-public class Player {
-
-    public enum Colour {
-        BLUE, PINK
-    }
+public class Player implements Actions, Colours{
 
     public enum Type {
         ZERO, ONE, PLAYER
@@ -20,6 +16,7 @@ public class Player {
 
     public static final int N_ROSES = 3;
     public static final int N_SKULLS = 1;
+    public static final float LEARNING_SPEED = 0.6f;
 
     public Stack<Token> tokenStack = new Stack<Token>();
     private Stack<ImageView> tokenImageViewStack = new Stack<ImageView>();
@@ -29,32 +26,40 @@ public class Player {
     public Colour colour;
     public Type type;
 
-    class State {
-
-        public int bid;
-        public int opponentTokenStackSize;
-        public Stack<Token> tokenStack = new Stack<Token>();
-
-        public State(int bid, int opponentTokenStackSize, Stack<Token> tokenStack) {
-            this.bid = bid;
-            this.opponentTokenStackSize = opponentTokenStackSize;
-            for(Token token : tokenStack){
-                this.tokenStack.push(token);
-            }
-        }
-
-    }
-
     /**
-     * Beliefs about future behavior of the opponent based on the state.
+     * Beliefs_0 about future behavior of the opponent based on the state.
      * @key The state of the player
      * @value The probability that the opponent will increase the bid (INCREASE_BID)
      */
-    private HashMap<State,Float> beliefs = new HashMap<State,Float>();
+    public HashMap<State,Float> beliefs_0 = new HashMap<State,Float>();
+
+    /**
+     * Update the beliefs_0 of the player about the opponent's future behavior
+     * after the opponent takes action a.
+     * @param s
+     * @param a
+     */
+    public void updateBelief(State s, Actions2 a){
+
+        if(!beliefs_0.containsKey(s)){
+            return;
+        }
+
+        System.out.println(this.name + " belief: " + s + " " + beliefs_0.get(s));
+
+        if(a == Actions2.INCREASE_BID){
+            beliefs_0.put(s, (1 - LEARNING_SPEED) * beliefs_0.get(s) + LEARNING_SPEED);
+        }else{
+            beliefs_0.put(s, (1 - LEARNING_SPEED) * beliefs_0.get(s));
+        }
+
+        System.out.println(this.name + " belief updated: " + s + " " + beliefs_0.get(s));
+
+    }
 
     public Player(String name, String colour, Type type) throws Exception {
         this.name = name;
-        this.colour = stringToColour(colour);
+        this.colour = Colours.stringToColour(colour);
         this.type = type;
         this.reset();
     }
@@ -63,25 +68,6 @@ public class Player {
         this.nRoses = N_ROSES;
         this.nSkulls = N_SKULLS;
         this.tokenStack.clear();
-    }
-
-    /**
-     * Converts a string representation of a colour to its corresponding Colour enum.
-     * @param colour the string representation of the colour
-     * @return the Colour enum corresponding to the given string
-     * @throws Exception if the given string does not match any valid Colour enum
-     */
-    private static Colour stringToColour(String colour) throws Exception {
-
-        switch (colour.toUpperCase()) {
-            case "BLUE":
-                return Colour.BLUE;
-            case "PINK":
-                return Colour.PINK;
-            default:
-                throw new Exception("Invalid Colour");
-        }
-
     }
 
     private void pushToken(Token token){
@@ -145,10 +131,6 @@ public class Player {
 
         return token;
 
-    }
-
-    public enum Actions1 {
-        PLACE_SKULL, PLACE_FLOWER, BID
     }
 
     private Actions1 place_skull(){
@@ -224,10 +206,6 @@ public class Player {
 
         }
 
-    }
-
-    public enum Actions2 {
-        INCREASE_BID, CHALLENGE
     }
 
     private Actions2 increase_bid(){
@@ -344,18 +322,18 @@ public class Player {
         switch (type) {
 
             // If the player uses zero-order theory of mind
-            // it forms beliefs about future behavior 
+            // it forms beliefs_0 about future behavior 
             // based on their state (number of tokens in the opponent's pile, its own stack and the bid)
             case ZERO:
 
-                State state = new State(bid, opponentTokenStackSize, this.tokenStack);
+                State state = new State(bid, opponentTokenStackSize, (Stack<Token>) this.tokenStack.clone());
 
                 // Initial belief is randon for both possible actions (INCREASE_BID or CHALLENGE)
-                beliefs.putIfAbsent(state, (float) Math.random());
+                beliefs_0.putIfAbsent(state, (float) Math.random());
 
                 float value_INCREASE_BID = 
-                    getReward2(Actions2.INCREASE_BID,Actions2.INCREASE_BID,opponentTokenStackSize,bid) * (beliefs.get(state)) 
-                    + getReward2(Actions2.INCREASE_BID,Actions2.CHALLENGE,opponentTokenStackSize,bid) * (1 - beliefs.get(state));
+                    getReward2(Actions2.INCREASE_BID,Actions2.INCREASE_BID,opponentTokenStackSize,bid) * (beliefs_0.get(state))
+                    + getReward2(Actions2.INCREASE_BID,Actions2.CHALLENGE,opponentTokenStackSize,bid) * (1 - beliefs_0.get(state));
 
                 float value_CHALLENGE = 
                     getReward2(Actions2.CHALLENGE,null,opponentTokenStackSize,bid);
@@ -373,10 +351,6 @@ public class Player {
 
         return Actions2.CHALLENGE;
 
-    }
-
-    public enum Actions3 {
-        TURN_ROSE, TURN_SKULL, TURN_NOTHING
     }
 
     public Actions3 play_3(Player opponent){

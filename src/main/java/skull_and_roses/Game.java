@@ -126,8 +126,10 @@ public class Game {
         App.gameController.updateLabels(bid,"2",player.name,action.toString());
 
         if(action == Player.Actions2.CHALLENGE){
+            opponent.updateBelief(new State(bid - 1, player.tokenStack.size(), opponent.tokenStack), action);
             stage_3(opponent,player);
         }else{
+            opponent.updateBelief(new State(bid - 2, player.tokenStack.size(), opponent.tokenStack), action);
             stage_2(opponent,player);
         }
 
