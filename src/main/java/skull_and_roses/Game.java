@@ -9,6 +9,8 @@ public class Game {
         ONE_vs_ZERO, ZERO_vs_ZERO, PLAYER_vs_ONE, PLAYER_vs_ZERO
     }
 
+    public static final boolean AUTO_MODE = true;
+
     // 2 players setup
     public ArrayList<Player> players = new ArrayList<Player>(2);
     
@@ -77,6 +79,26 @@ public class Game {
         };
     }
 
+    public void restart() {
+
+        for (Player player : players) {
+            player.reset();
+        }
+
+        bid = 0;
+        nTicks = 0;
+
+        System.out.println("Game Restarted: " + players.get(0).name + " vs " + players.get(1).name);
+
+        int firstPlayer = ThreadLocalRandom.current().nextInt(0, 2);
+
+        System.out.println("First Player: " + players.get(firstPlayer).name);
+        App.gameController.updateLabels(bid,"0",players.get(firstPlayer).name,"FIRST_PLAYER");
+
+        this.stage_1(players.get(firstPlayer),players.get(1 - firstPlayer));
+
+    }
+
     public synchronized void tick() {
         nTicks++;
         notifyAll();
@@ -97,7 +119,7 @@ public class Game {
 
     public void stage_1(Player player, Player opponent) {
 
-        wait_tick();
+        if(!AUTO_MODE){wait_tick();}
 
         Player.Actions1 action = player.play_1(opponent.tokenStack.size());
 
@@ -116,7 +138,7 @@ public class Game {
 
     public void stage_2(Player player, Player opponent){
 
-        wait_tick();
+        if(!AUTO_MODE){wait_tick();}
 
         Player.Actions2 action = player.play_2(opponent.tokenStack.size(),bid);
 
@@ -137,7 +159,7 @@ public class Game {
 
     public void stage_3(Player player, Player opponent){
 
-        wait_tick();
+        if(!AUTO_MODE){wait_tick();}
 
         Player.Actions3 action = player.play_3(opponent);
 
@@ -165,7 +187,7 @@ public class Game {
 
     public void game_over(Player winner, Player loser){
 
-        wait_tick();
+        if(!AUTO_MODE){wait_tick();}
 
         System.out.println("Winner: " + winner.name);
         System.out.println("Looser: " + loser.name);
@@ -173,6 +195,10 @@ public class Game {
 
         winner.storeBeliefs();
         loser.storeBeliefs();
+
+        if(AUTO_MODE){
+            this.restart();
+        }
 
     }
 

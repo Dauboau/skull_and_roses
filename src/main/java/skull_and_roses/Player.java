@@ -50,7 +50,7 @@ public class Player implements Actions, Colours{
             return;
         }
 
-        System.out.println(this.name + " belief: " + s + " " + beliefs_0.get(s));
+        System.out.println(this.name + " belief: " + beliefs_0.get(s));
 
         if(a == Actions2.INCREASE_BID){
             beliefs_0.put(s, (1 - LEARNING_SPEED) * beliefs_0.get(s) + LEARNING_SPEED);
@@ -58,7 +58,7 @@ public class Player implements Actions, Colours{
             beliefs_0.put(s, (1 - LEARNING_SPEED) * beliefs_0.get(s));
         }
 
-        System.out.println(this.name + " belief updated: " + s + " " + beliefs_0.get(s));
+        System.out.println(this.name + " belief updated: " + beliefs_0.get(s));
 
     }
 
@@ -74,6 +74,10 @@ public class Player implements Actions, Colours{
         this.nRoses = N_ROSES;
         this.nSkulls = N_SKULLS;
         this.tokenStack.clear();
+        for(ImageView token : tokenImageViewStack){
+            App.gameController.removeToken(token, App.game.players.indexOf(this));
+        }
+        this.tokenImageViewStack.clear();
     }
 
     private void pushToken(Token token){
