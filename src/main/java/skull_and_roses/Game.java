@@ -171,6 +171,9 @@ public class Game {
         System.out.println("Looser: " + loser.name);
         App.gameController.updateLabels(bid,"4",winner.name,"WINNER");
 
+        winner.storeBeliefs();
+        loser.storeBeliefs();
+
     }
 
     /**

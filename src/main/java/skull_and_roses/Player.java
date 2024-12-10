@@ -1,4 +1,9 @@
 package skull_and_roses;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Stack;
 import java.util.concurrent.ThreadLocalRandom;
@@ -62,6 +67,7 @@ public class Player implements Actions, Colours{
         this.colour = Colours.stringToColour(colour);
         this.type = type;
         this.reset();
+        this.loadBeliefs();
     }
 
     public void reset(){
@@ -373,6 +379,54 @@ public class Player implements Actions, Colours{
 
         return Actions3.TURN_NOTHING;
 
+    }
+
+    public void storeBeliefs(){
+            
+        switch (type) {
+
+            case ZERO:
+
+                try{
+                    FileOutputStream fileOut = new FileOutputStream(this.name + "_beliefs_0");
+                    ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                    out.writeObject(beliefs_0);
+                    out.close();
+                }catch(IOException i){
+                    i.printStackTrace();
+                }
+                
+                break;
+
+            default:
+                break;
+
+        }
+    }
+
+    public void loadBeliefs() {
+
+        switch (type) {
+
+            case ZERO:
+
+                try{
+                    FileInputStream fileIn = new FileInputStream(this.name + "_beliefs_0");
+                    ObjectInputStream in = new ObjectInputStream(fileIn);
+                    beliefs_0 = (HashMap<State, Float>) in.readObject();
+                    in.close();
+                }catch(IOException i){
+                    i.printStackTrace();
+                }catch (ClassNotFoundException c) {
+                    c.printStackTrace();
+                }
+                
+                break;
+
+            default:
+                break;
+
+        }
     }
 
 }

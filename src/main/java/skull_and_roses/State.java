@@ -1,9 +1,10 @@
 package skull_and_roses;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.Stack;
 
-public class State {
+public class State implements Serializable{
 
     public int bid;
     public int opponentTokenStackSize;
