@@ -62,7 +62,7 @@ public class GameController {
     public void reset(){
         p1Grid.getChildren().clear();
         p2Grid.getChildren().clear();
-        App.game = new Game(Game.Type.ZERO_vs_ZERO);
+        App.game = new Game(App.game.type);
         initialize();
     }
 
