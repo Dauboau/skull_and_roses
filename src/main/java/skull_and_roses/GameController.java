@@ -3,9 +3,11 @@ package skull_and_roses;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -46,16 +48,22 @@ public class GameController {
      */
     @FXML
     public void initialize() {
-
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(App.game.start());
         App.gameController = this;
-
     }
 
     @FXML
     public void tick_on_click(){
         App.game.tick();
+    }
+
+    @FXML
+    public void reset(){
+        p1Grid.getChildren().clear();
+        p2Grid.getChildren().clear();
+        App.game = new Game(Game.Type.ZERO_vs_ZERO);
+        initialize();
     }
 
     public void setPlayerLabels(String p1Name, String p2Name){

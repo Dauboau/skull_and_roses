@@ -77,5 +77,10 @@
             <Font name="SF Pro Text Regular" size="36.0" />
          </font>
       </Label>
+      <Button onAction="#reset" text="Reset" textFill="WHITE" GridPane.columnIndex="2" GridPane.halignment="LEFT">
+         <font>
+            <Font name="SF Pro Text Regular" size="24.0" />
+         </font>
+      </Button>
    </children>
 </GridPane>

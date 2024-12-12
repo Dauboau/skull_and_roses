@@ -9,7 +9,7 @@ public class Game {
         ONE_vs_ZERO, ZERO_vs_ZERO, PLAYER_vs_ONE, PLAYER_vs_ZERO
     }
 
-    public static final boolean AUTO_MODE = true;
+    public static final boolean AUTO_MODE = false;
 
     // 2 players setup
     public ArrayList<Player> players = new ArrayList<Player>(2);
