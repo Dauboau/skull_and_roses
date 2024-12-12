@@ -9,9 +9,9 @@
 
 <GridPane onMouseClicked="#tick_on_click" prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: #291c1a;" stylesheets="@sytle.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="skull_and_roses.GameController">
    <columnConstraints>
-      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" />
-      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" percentWidth="60.0" />
-      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" />
+      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" percentWidth="17.0" />
+      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" percentWidth="66.0" />
+      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" percentWidth="17.0" />
    </columnConstraints>
    <rowConstraints>
       <RowConstraints minHeight="10.0" percentHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -21,10 +21,6 @@
       <RowConstraints minHeight="10.0" percentHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="SOMETIMES" />
    </rowConstraints>
    <children>
-        <Button fx:id="secondaryButton" onAction="#menu" text="Menu" textFill="WHITE" translateX="-20.0" GridPane.columnIndex="2" GridPane.halignment="RIGHT">
-         <font>
-            <Font name="SF Pro Text Regular" size="24.0" />
-         </font></Button>
       <Label fx:id="bidLabel" text="Bid: 0" textFill="WHITE" GridPane.columnIndex="2" GridPane.rowIndex="2">
          <font>
             <Font name="SF Pro Text Regular" size="36.0" />
@@ -77,10 +73,26 @@
             <Font name="SF Pro Text Regular" size="36.0" />
          </font>
       </Label>
-      <Button onAction="#reset" text="Reset" textFill="WHITE" GridPane.columnIndex="2" GridPane.halignment="LEFT">
-         <font>
-            <Font name="SF Pro Text Regular" size="24.0" />
-         </font>
-      </Button>
+      <GridPane GridPane.columnIndex="2">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="50.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" percentWidth="50.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+              <Button fx:id="secondaryButton" focusTraversable="false" onAction="#menu" text="Menu" textFill="WHITE" GridPane.columnIndex="1" GridPane.halignment="CENTER">
+               <font>
+                  <Font name="SF Pro Text Regular" size="24.0" />
+               </font>
+            </Button>
+            <Button focusTraversable="false" onAction="#reset" text="Reset" textFill="WHITE" GridPane.halignment="CENTER">
+               <font>
+                  <Font name="SF Pro Text Regular" size="24.0" />
+               </font>
+            </Button>
+         </children>
+      </GridPane>
    </children>
 </GridPane>

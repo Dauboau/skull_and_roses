@@ -46,9 +46,8 @@ public class Player implements Actions, Colours{
      */
     public void updateBelief(State s, Actions2 a){
 
-        if(!beliefs_0.containsKey(s)){
-            return;
-        }
+        // Initial belief is randon for both possible actions (INCREASE_BID or CHALLENGE)
+        beliefs_0.putIfAbsent(s, (float) Math.random());
 
         System.out.println(this.name + " belief: " + beliefs_0.get(s));
 
@@ -68,6 +67,14 @@ public class Player implements Actions, Colours{
         this.type = type;
         this.reset();
         this.loadBeliefs();
+
+        /*
+        for(State s : this.beliefs_0.keySet()){
+            System.out.println(s);
+            System.out.println(this.beliefs_0.get(s));
+        }
+        */
+
     }
 
     public void reset(){

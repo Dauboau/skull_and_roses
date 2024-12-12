@@ -9,7 +9,7 @@ public class Game {
         ONE_vs_ZERO, ZERO_vs_ZERO, PLAYER_vs_ONE, PLAYER_vs_ZERO
     }
 
-    public static final boolean AUTO_MODE = true;
+    public static final boolean AUTO_MODE = false;
 
     // 2 players setup
     public ArrayList<Player> players = new ArrayList<Player>(2);
@@ -201,18 +201,5 @@ public class Game {
         }
 
     }
-
-    /**
-     * First stage: randonly selecting the tokens
-     * 
-     * Second stage: I need to implement q-learning feature, so the agents beliefs are refined based on the opponents actions.
-     * So, based on the number of tokens in the opponent's pile, its own stack and the bid, the agent will decide to bid or not.
-     * This is the state 👍🏻
-     * The beliefs are whether the opponent is gonna raise or challenge the bid depending on the agent's action.
-     * The objective of the agent is to win the game, so it should raise the bid while believing that the opponent won't challenge,
-     * because that maximizes the chances of winning.
-     * 
-     * Third stage: trivial -> removes tokens from its own pile than from the opponents
-     */
 
 }
