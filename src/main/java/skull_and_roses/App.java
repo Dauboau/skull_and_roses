@@ -34,6 +34,7 @@ public class App extends Application {
 
     public static void main(String[] args) {
         launch();
+        game.players.forEach(p -> System.out.println(p.name + " winned: " + p.nWins));
         System.exit(0);
     }
 

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Stack;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -21,7 +22,7 @@ public class Player implements Actions, Colours{
 
     public static final int N_ROSES = 3;
     public static final int N_SKULLS = 1;
-    public static final float LEARNING_SPEED = 0.6f;
+    public static final float LEARNING_SPEED = 0.3f;
 
     public Stack<Token> tokenStack = new Stack<Token>();
     private Stack<ImageView> tokenImageViewStack = new Stack<ImageView>();
@@ -30,6 +31,7 @@ public class Player implements Actions, Colours{
     public String name;
     public Colour colour;
     public Type type;
+    public int nWins = 0;
 
     /**
      * Beliefs_0 about future behavior of the opponent based on the state.
@@ -39,17 +41,24 @@ public class Player implements Actions, Colours{
     public HashMap<State,Float> beliefs_0 = new HashMap<State,Float>();
 
     /**
+     * Beliefs_1 about future behavior of the player based on the state.
+     * @key The state of the player
+     * @value The probability that the player will increase the bid (INCREASE_BID)
+     */
+    public HashMap<State,Float> beliefs_1 = new HashMap<State,Float>();
+
+    /**
      * Update the beliefs_0 of the player about the opponent's future behavior
      * after the opponent takes action a.
      * @param s
      * @param a
      */
-    public void updateBelief(State s, Actions2 a){
+    public void updateBelief_0(State s, Actions2 a){
 
         // Initial belief is randon for both possible actions (INCREASE_BID or CHALLENGE)
         beliefs_0.putIfAbsent(s, (float) Math.random());
 
-        System.out.println(this.name + " belief: " + beliefs_0.get(s));
+        System.out.println(this.name + " belief_0: " + beliefs_0.get(s));
 
         if(a == Actions2.INCREASE_BID){
             beliefs_0.put(s, (1 - LEARNING_SPEED) * beliefs_0.get(s) + LEARNING_SPEED);
@@ -57,7 +66,24 @@ public class Player implements Actions, Colours{
             beliefs_0.put(s, (1 - LEARNING_SPEED) * beliefs_0.get(s));
         }
 
-        System.out.println(this.name + " belief updated: " + beliefs_0.get(s));
+        System.out.println(this.name + " belief_0 updated: " + beliefs_0.get(s));
+
+    }
+
+    public void updateBelief_1(State s, Actions2 a){
+
+        // Initial belief is randon for both possible actions (INCREASE_BID or CHALLENGE)
+        beliefs_1.putIfAbsent(s, (float) Math.random());
+
+        System.out.println(this.name + " belief_1: " + beliefs_1.get(s));
+
+        if(a == Actions2.INCREASE_BID){
+            beliefs_1.put(s, (1 - LEARNING_SPEED) * beliefs_1.get(s) + LEARNING_SPEED);
+        }else{
+            beliefs_1.put(s, (1 - LEARNING_SPEED) * beliefs_1.get(s));
+        }
+
+        System.out.println(this.name + " belief_1 updated: " + beliefs_1.get(s));
 
     }
 
@@ -179,34 +205,34 @@ public class Player implements Actions, Colours{
             }else if(this.nRoses == 0){
                 
                 // If there are no roses left, the player should bid or play a skull token (randonly)
-                int randon = ThreadLocalRandom.current().nextInt(0, 2);
+                int randon = ThreadLocalRandom.current().nextInt(0, this.nSkulls + 1);
                 if(randon == 0){
-                    return place_skull();
-                }else{
                     return bid();
+                }else{
+                    return place_skull();
                 }
 
             }else if(this.nSkulls == 0){
                 
                 // If there are no skulls left, the player should bid or play a flower token (randonly)
                 // It may bid unless the last token is a skull
-                int randon = ThreadLocalRandom.current().nextInt(0, 3);
-                if(randon <= 1 || this.tokenStack.peek() == Token.SKULL){
-                    return place_flower();
-                }else{
+                int randon = ThreadLocalRandom.current().nextInt(0, this.nRoses + 1);
+                if(randon == 0){
                     return bid();
+                }else{
+                    return place_flower();
                 }
 
             }else{
 
                 // Randomly choose an action with equal probability
-                int randon = ThreadLocalRandom.current().nextInt(0, 4);
+                int randon = ThreadLocalRandom.current().nextInt(0, this.nRoses + this.nSkulls + 1);
                 if(randon == 0){
-                    return place_skull();
-                }else if(randon == 1 || randon == 2){
-                    return place_flower();
-                }else{
                     return bid();
+                }else if(randon == 1){
+                    return place_skull();
+                }else{
+                    return place_flower();
                 }
 
             }
@@ -214,7 +240,7 @@ public class Player implements Actions, Colours{
         }else{
             
             // If the player has not yet played a token, it must do so (randonly)
-            int randon = ThreadLocalRandom.current().nextInt(0, 2);
+            int randon = ThreadLocalRandom.current().nextInt(0, N_ROSES + N_SKULLS);
             if(randon == 0){
                 return place_skull();
             }else{
@@ -234,23 +260,21 @@ public class Player implements Actions, Colours{
         return Actions2.CHALLENGE;
     }
 
-    /**
-    * π(a,aj) -> Reward function for the player if it takes action a and the opponent takes action aj
-    * @return the odds of winning based on the player's state
-    */
-    private float getReward2(Actions2 a, Actions2 aj, int opponentTokenStackSize, int bid){
+    private float getReward_2(Actions2 a, Actions2 aj, Stack<Token> playerTokenStack, int opponentTokenStackSize, int bid){
 
         if(a == Actions2.INCREASE_BID && aj == Actions2.INCREASE_BID){
             
             // maybe it will win
-            return 0.5f;
+            // at the end of the day, the higger the bid
+            // the higher the probability of winning when challenging
+            return 0.55f;
 
         }else if(a == Actions2.INCREASE_BID && aj == Actions2.CHALLENGE){
 
             // calculate the probability of winning if the player is challenged
             float prob = 1;
             int nRoses = 0;
-            Stack<Token> stackAux = (Stack<Token>)tokenStack.clone();
+            Stack<Token> stackAux = (Stack<Token>)playerTokenStack.clone();
             while(!stackAux.isEmpty()){
 
                 if(stackAux.pop() == Token.ROSE){
@@ -259,7 +283,7 @@ public class Player implements Actions, Colours{
                 }else{
                     // not enough roses means winning with probability 0
                     //prob = 0;
-                    return -1;
+                    return 0;
                 }
 
                 if(nRoses >= bid + 1){
@@ -271,13 +295,13 @@ public class Player implements Actions, Colours{
             }
 
             // the opponent does not have enough tokens remaining for the player to win
-            if(bid + 1 - nRoses >= opponentTokenStackSize){
+            if(bid + 1 - nRoses > opponentTokenStackSize || bid + 1 - nRoses > N_ROSES){
                 //prob = 0
-                return -1;
+                return 0;
             }
 
-            int roses_aux = N_ROSES;
-            int skulls_aux = N_SKULLS;
+            float roses_aux = N_ROSES;
+            float skulls_aux = N_SKULLS;
             int tokens_aux = opponentTokenStackSize;
             while(nRoses < bid + 1 && tokens_aux > 0){
 
@@ -294,13 +318,14 @@ public class Player implements Actions, Colours{
         }else{
 
             // calculate the probability of winning if the player challenges
+            // (i.e: the opponent finds a skull or can not find enough roses)
             float prob = 1;
             int nRoses = 0;
 
-            int roses_aux = N_ROSES;
-            int skulls_aux = N_SKULLS;
+            float roses_aux = N_ROSES;
+            float skulls_aux = N_SKULLS;
             int tokens_aux = opponentTokenStackSize;
-            while(nRoses < bid + 1 && tokens_aux > 0){
+            while(nRoses < bid && tokens_aux > 0){
 
                 prob = prob * (roses_aux / (roses_aux + skulls_aux));
                 roses_aux--;
@@ -309,8 +334,10 @@ public class Player implements Actions, Colours{
                 tokens_aux--;
 
             }
+            // The probability of the opponent finding a skull is the complement of the probability of finding only roses
+            prob = 1 - prob;
 
-            Stack<Token> stackAux = (Stack<Token>)tokenStack.clone();
+            Stack<Token> stackAux = (Stack<Token>)playerTokenStack.clone();
             while(!stackAux.isEmpty()){
 
                 if(stackAux.pop() == Token.ROSE){
@@ -349,24 +376,114 @@ public class Player implements Actions, Colours{
                 beliefs_0.putIfAbsent(state, (float) Math.random());
 
                 float value_INCREASE_BID = 
-                    getReward2(Actions2.INCREASE_BID,Actions2.INCREASE_BID,opponentTokenStackSize,bid) * (beliefs_0.get(state))
-                    + getReward2(Actions2.INCREASE_BID,Actions2.CHALLENGE,opponentTokenStackSize,bid) * (1 - beliefs_0.get(state));
+                    getReward_2(Actions2.INCREASE_BID,Actions2.INCREASE_BID,this.tokenStack,opponentTokenStackSize,bid) * (beliefs_0.get(state))
+                    + getReward_2(Actions2.INCREASE_BID,Actions2.CHALLENGE,this.tokenStack,opponentTokenStackSize,bid) * (1 - beliefs_0.get(state));
 
                 float value_CHALLENGE = 
-                    getReward2(Actions2.CHALLENGE,null,opponentTokenStackSize,bid);
+                    getReward_2(Actions2.CHALLENGE,null,this.tokenStack,opponentTokenStackSize,bid);
 
-                if(value_INCREASE_BID >= value_CHALLENGE){
+                System.out.println(this.name + " value_INCREASE_BID: " + value_INCREASE_BID);
+                System.out.println(this.name + " value_CHALLENGE: " + value_CHALLENGE);
+
+                if(value_INCREASE_BID > value_CHALLENGE){
                     return increase_bid();
                 }else{
                     return challenge();
                 }
+
+            // If the player uses first-order theory of mind
+            // it forms beliefs_1 about future behavior
+            // putting itslef in the place of the opponent
+            case ONE:
+
+                state = new State(bid, opponentTokenStackSize, (Stack<Token>) this.tokenStack.clone());
+
+                // Initial belief is randon for both possible actions (INCREASE_BID or CHALLENGE)
+                beliefs_1.putIfAbsent(state, (float) Math.random());
+
+                // *** --- ***
+                // Predict opponent's behavior
+
+                // Interpretative theory of mind
+                // Considering the opponent is rational,
+                // it would only have increased the bid if it has enough roses to win if challenged
+                
+                LinkedList<Token> interpretedStackList = new LinkedList<Token>();
+                int nRosesLeft = N_ROSES;
+                int nSkullsLeft = N_SKULLS;
+                int bidLeft = bid;
+                for(int i=0; i<opponentTokenStackSize; i++){
+                    if(nRosesLeft > 0){
+                        if(bidLeft > 0){    
+                            interpretedStackList.addFirst(Token.ROSE);
+                            nRosesLeft--;
+                        }else{
+                            int uknownToken = ThreadLocalRandom.current().nextInt(0, nRosesLeft + nSkullsLeft);
+                            if(uknownToken < nRosesLeft){
+                                interpretedStackList.addFirst(Token.ROSE);
+                                nRosesLeft--;
+                            }else{
+                                interpretedStackList.addFirst(Token.SKULL);
+                                nSkullsLeft--;
+                            }
+                        }
+                    }else{
+                        interpretedStackList.addFirst(Token.SKULL);
+                    }
+                    bidLeft--;
+                }
+
+                Stack<Token> interpretedStack = new Stack<Token>();
+                for(Token token : interpretedStackList){
+                    interpretedStack.push(token);
+                }
+
+                // Predictive theory of mind
+                // The player puts itself in the place of the opponent
+                // Obs: bid + 1 is used, because the opponent will only 
+                // play if the player increases the bid
+                value_INCREASE_BID = 
+                    getReward_2(Actions2.INCREASE_BID,Actions2.INCREASE_BID,interpretedStack,this.tokenStack.size(),bid+1) * (beliefs_1.get(state))
+                    + getReward_2(Actions2.INCREASE_BID,Actions2.CHALLENGE,interpretedStack,this.tokenStack.size(),bid+1) * (1 - beliefs_1.get(state));
+                value_CHALLENGE = 
+                    getReward_2(Actions2.CHALLENGE,null,interpretedStack,this.tokenStack.size(),bid+1);
+
+                Actions2 action_opponent;
+                if(value_INCREASE_BID > value_CHALLENGE){
+                    action_opponent = Actions2.INCREASE_BID;
+                }else{
+                    action_opponent = Actions2.CHALLENGE;
+                }
+
+                System.out.println("Opponent's predicted Stack: " + interpretedStack);
+                System.out.println("Opponent will: " + action_opponent);
+                // *** --- ***
+
+                // *** --- ***
+                // Decide player's behavior (confidence c1 is 1)
+                value_INCREASE_BID = 
+                    getReward_2(Actions2.INCREASE_BID,action_opponent,this.tokenStack,opponentTokenStackSize,bid);
+                    
+                value_CHALLENGE = 
+                    getReward_2(Actions2.CHALLENGE,null,this.tokenStack,opponentTokenStackSize,bid);
+
+                System.out.println(this.name + " value_INCREASE_BID: " + value_INCREASE_BID);
+                System.out.println(this.name + " value_CHALLENGE: " + value_CHALLENGE);
+
+                if(value_INCREASE_BID > value_CHALLENGE){
+                    return increase_bid();
+                }else{
+                    return challenge();
+                }
+                // *** --- ***
+
         
             default:
                 break;
 
         }
 
-        return Actions2.CHALLENGE;
+        return null;
 
     }
 
@@ -397,6 +514,7 @@ public class Player implements Actions, Colours{
         switch (type) {
 
             case ZERO:
+            case ONE:
 
                 try{
                     FileOutputStream fileOut = new FileOutputStream(this.name + "_beliefs_0");
@@ -406,7 +524,16 @@ public class Player implements Actions, Colours{
                 }catch(IOException i){
                     i.printStackTrace();
                 }
-                
+
+                try{
+                    FileOutputStream fileOut = new FileOutputStream(this.name + "_beliefs_1");
+                    ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                    out.writeObject(beliefs_1);
+                    out.close();
+                }catch(IOException i){
+                    i.printStackTrace();
+                }
+
                 break;
 
             default:
@@ -420,6 +547,7 @@ public class Player implements Actions, Colours{
         switch (type) {
 
             case ZERO:
+            case ONE:
 
                 try{
                     FileInputStream fileIn = new FileInputStream(this.name + "_beliefs_0");
@@ -431,7 +559,18 @@ public class Player implements Actions, Colours{
                 }catch (ClassNotFoundException c) {
                     c.printStackTrace();
                 }
-                
+
+                try{
+                    FileInputStream fileIn = new FileInputStream(this.name + "_beliefs_1");
+                    ObjectInputStream in = new ObjectInputStream(fileIn);
+                    beliefs_1 = (HashMap<State, Float>) in.readObject();
+                    in.close();
+                }catch(IOException i){
+                    i.printStackTrace();
+                }catch (ClassNotFoundException c) {
+                    c.printStackTrace();
+                }
+
                 break;
 
             default:

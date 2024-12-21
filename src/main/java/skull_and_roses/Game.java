@@ -2,6 +2,7 @@ package skull_and_roses;
 
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Game {
 
@@ -18,6 +19,8 @@ public class Game {
     public int nTicks = 0;
     public Type type;
 
+    public AtomicBoolean resetFlag = new AtomicBoolean(false);
+
     public Game(Type type) {
         this.type = type;
         setPlayers(type,"p1","p2","pink","blue");
@@ -26,6 +29,13 @@ public class Game {
     public Game(Type type, String p1, String p2, String c1, String c2) {
         this.type = type;
         setPlayers(type, p1, p2, c1, c2);
+    }
+
+    public Game(Game oldGame){
+        this.type = oldGame.type;
+        for (Player player : oldGame.players) {
+            players.add(player);
+        }
     }
 
     private void setPlayers(Type type, String p1, String p2, String c1, String c2) {
@@ -67,8 +77,11 @@ public class Game {
 
     public Runnable start() {
         return () -> {
+
+            resetFlag.set(false);
+
             System.out.println("Game Started: " + players.get(0).name + " vs " + players.get(1).name);
-            App.gameController.setPlayerLabels(players.get(0).name,players.get(1).name);
+            App.gameController.setPlayerLabels(players.get(0).name,players.get(1).name,players.get(0).type.toString(),players.get(1).type.toString());
 
             int firstPlayer = ThreadLocalRandom.current().nextInt(0, 2);
 
@@ -79,7 +92,9 @@ public class Game {
         };
     }
 
-    public void restart() {
+    public synchronized void reset() {
+
+        System.out.println("Game Restarting: " + players.get(0).name + " vs " + players.get(1).name);
 
         for (Player player : players) {
             player.reset();
@@ -88,14 +103,8 @@ public class Game {
         bid = 0;
         nTicks = 0;
 
-        System.out.println("Game Restarted: " + players.get(0).name + " vs " + players.get(1).name);
-
-        int firstPlayer = ThreadLocalRandom.current().nextInt(0, 2);
-
-        System.out.println("First Player: " + players.get(firstPlayer).name);
-        App.gameController.updateLabels(bid,"0",players.get(firstPlayer).name,"FIRST_PLAYER");
-
-        this.stage_1(players.get(firstPlayer),players.get(1 - firstPlayer));
+        resetFlag.set(true);
+        tick();
 
     }
 
@@ -119,7 +128,10 @@ public class Game {
 
     public void stage_1(Player player, Player opponent) {
 
-        if(!AUTO_MODE){wait_tick();}
+        if(!AUTO_MODE){
+            wait_tick();
+            if(resetFlag.get()){return;}
+        }
 
         Player.Actions1 action = player.play_1(opponent.tokenStack.size());
 
@@ -138,20 +150,25 @@ public class Game {
 
     public void stage_2(Player player, Player opponent){
 
-        if(!AUTO_MODE){wait_tick();}
+        if(!AUTO_MODE){
+            wait_tick();
+            if(resetFlag.get()){return;}
+        }
 
         Player.Actions2 action = player.play_2(opponent.tokenStack.size(),bid);
 
-        System.out.println("Stage 2: " + player.name + " " + action + " " + bid);
+        System.out.println("Stage 2: " + player.name + "(" + player.type + ") " + action + " " + bid);
         System.out.println("Player's token stack: " + player.tokenStack);
         System.out.println("Opponent's token stack: " + opponent.tokenStack);
         App.gameController.updateLabels(bid,"2",player.name,action.toString());
 
         if(action == Player.Actions2.CHALLENGE){
-            opponent.updateBelief(new State(bid - 1, player.tokenStack.size(), opponent.tokenStack), action);
+            opponent.updateBelief_0(new State(bid - 1, player.tokenStack.size(), opponent.tokenStack), action);
+            player.updateBelief_1(new State(bid, player.tokenStack.size(), opponent.tokenStack), action);
             stage_3(opponent,player);
         }else{
-            opponent.updateBelief(new State(bid - 2, player.tokenStack.size(), opponent.tokenStack), action);
+            opponent.updateBelief_0(new State(bid - 2, player.tokenStack.size(), opponent.tokenStack), action);
+            player.updateBelief_1(new State(bid-1, player.tokenStack.size(), opponent.tokenStack), action);
             stage_2(opponent,player);
         }
 
@@ -159,7 +176,10 @@ public class Game {
 
     public void stage_3(Player player, Player opponent){
 
-        if(!AUTO_MODE){wait_tick();}
+        if(!AUTO_MODE){
+            wait_tick();
+            if(resetFlag.get()){return;}
+        }
 
         Player.Actions3 action = player.play_3(opponent);
 
@@ -187,17 +207,22 @@ public class Game {
 
     public void game_over(Player winner, Player loser){
 
-        if(!AUTO_MODE){wait_tick();}
+        if(!AUTO_MODE){
+            wait_tick();
+            if(resetFlag.get()){return;}
+        }
 
         System.out.println("Winner: " + winner.name);
         System.out.println("Looser: " + loser.name);
         App.gameController.updateLabels(bid,"4",winner.name,"WINNER");
 
+        winner.nWins++;
+
         winner.storeBeliefs();
         loser.storeBeliefs();
 
         if(AUTO_MODE){
-            this.restart();
+            App.gameController.reset();
         }
 
     }

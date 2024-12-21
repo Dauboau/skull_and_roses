@@ -14,6 +14,24 @@ public class MenuController {
     }
 
     @FXML
+    private void one_vs_zero() throws IOException {
+        App.game = new Game(Game.Type.ONE_vs_ZERO);
+        App.setRoot("game");
+    }
+
+    @FXML
+    private void player_vs_zero() throws IOException {
+        App.game = new Game(Game.Type.PLAYER_vs_ZERO);
+        App.setRoot("game");
+    }
+
+    @FXML
+    private void player_vs_one() throws IOException {
+        App.game = new Game(Game.Type.PLAYER_vs_ONE);
+        App.setRoot("game");
+    }
+
+    @FXML
     private ImageView imageView;
 
     @FXML

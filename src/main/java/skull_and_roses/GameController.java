@@ -40,12 +40,12 @@ public class GameController {
         App.setRoot("menu");
     }
 
+    ExecutorService executor = Executors.newSingleThreadExecutor();
     /**
      * The initialize method is called when the game starts.
      */
     @FXML
     public void initialize() {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(App.game.start());
         App.gameController = this;
     }
@@ -57,16 +57,14 @@ public class GameController {
 
     @FXML
     public void reset(){
-        p1Grid.getChildren().clear();
-        p2Grid.getChildren().clear();
-        App.game = new Game(App.game.type);
-        initialize();
+        App.game.reset();
+        executor.execute(App.game.start());
     }
 
-    public void setPlayerLabels(String p1Name, String p2Name){
+    public void setPlayerLabels(String p1Name, String p2Name, String p1Type, String p2Type){
         Platform.runLater(() -> {
-            p1.setText(p1Name);
-            p2.setText(p2Name);
+            p1.setText(p1Name + "(" + p1Type + ")");
+            p2.setText(p2Name + "(" + p2Type + ")");
         });
     }
 

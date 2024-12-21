@@ -48,17 +48,17 @@
                   <Font name="SF Pro Text Regular" size="24.0" />
                </font>
             </Button>
-            <Button fx:id="primaryButton" onAction="#zero_vs_zero" text="ONE vs ZERO" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <Button fx:id="primaryButton" onAction="#one_vs_zero" text="ONE vs ZERO" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="1">
                <font>
                   <Font name="SF Pro Text Regular" size="24.0" />
                </font>
             </Button>
-            <Button fx:id="primaryButton2" onAction="#zero_vs_zero" text="PLAYER vs ONE" textFill="WHITE" GridPane.columnIndex="3" GridPane.rowIndex="1">
+            <Button fx:id="primaryButton2" onAction="#player_vs_one" text="PLAYER vs ONE" textFill="WHITE" GridPane.columnIndex="3" GridPane.rowIndex="1">
                <font>
                   <Font name="SF Pro Text Regular" size="24.0" />
                </font>
             </Button>
-            <Button fx:id="primaryButton21" onAction="#zero_vs_zero" text="PLAYER vs ZERO" textFill="WHITE" GridPane.columnIndex="2" GridPane.rowIndex="1">
+            <Button fx:id="primaryButton21" onAction="#player_vs_zero" text="PLAYER vs ZERO" textFill="WHITE" GridPane.columnIndex="2" GridPane.rowIndex="1">
                <font>
                   <Font name="SF Pro Text Regular" size="24.0" />
                </font>
