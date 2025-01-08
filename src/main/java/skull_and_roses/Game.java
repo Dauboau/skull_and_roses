@@ -11,12 +11,14 @@ public class Game {
     }
 
     public static final boolean AUTO_MODE = true;
+    public static final int N_ROUNDS = 1000;
 
     // 2 players setup
     public ArrayList<Player> players = new ArrayList<Player>(2);
     
     public Integer bid = 0;
     public int nTicks = 0;
+    public int nRounds = 0;
     public Type type;
 
     public AtomicBoolean resetFlag = new AtomicBoolean(false);
@@ -217,11 +219,12 @@ public class Game {
         App.gameController.updateLabels(bid,"4",winner.name,"WINNER");
 
         winner.nWins++;
+        nRounds++;
 
         winner.storeBeliefs();
         loser.storeBeliefs();
 
-        if(AUTO_MODE){
+        if(AUTO_MODE && nRounds < N_ROUNDS){
             App.gameController.reset();
         }
 

@@ -93,14 +93,6 @@ public class Player implements Actions, Colours{
         this.type = type;
         this.reset();
         this.loadBeliefs();
-
-        /*
-        for(State s : this.beliefs_0.keySet()){
-            System.out.println(s);
-            System.out.println(this.beliefs_0.get(s));
-        }
-        */
-
     }
 
     public void reset(){
@@ -217,7 +209,7 @@ public class Player implements Actions, Colours{
                 // If there are no skulls left, the player should bid or play a flower token (randonly)
                 // It may bid unless the last token is a skull
                 int randon = ThreadLocalRandom.current().nextInt(0, this.nRoses + 1);
-                if(randon == 0){
+                if(randon == 0 && this.tokenStack.peek() != Token.SKULL){ // rationality
                     return bid();
                 }else{
                     return place_flower();
