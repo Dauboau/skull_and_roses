@@ -58,7 +58,7 @@ public class Player implements Actions, Colours{
         // Initial belief is randon for both possible actions (INCREASE_BID or CHALLENGE)
         beliefs_0.putIfAbsent(s, (float) Math.random());
 
-        System.out.println(this.name + " belief_0: " + beliefs_0.get(s));
+        //System.out.println(this.name + " belief_0: " + beliefs_0.get(s));
 
         if(a == Actions2.INCREASE_BID){
             beliefs_0.put(s, (1 - LEARNING_SPEED) * beliefs_0.get(s) + LEARNING_SPEED);
@@ -66,7 +66,7 @@ public class Player implements Actions, Colours{
             beliefs_0.put(s, (1 - LEARNING_SPEED) * beliefs_0.get(s));
         }
 
-        System.out.println(this.name + " belief_0 updated: " + beliefs_0.get(s));
+        //System.out.println(this.name + " belief_0 updated: " + beliefs_0.get(s));
 
     }
 
@@ -75,7 +75,7 @@ public class Player implements Actions, Colours{
         // Initial belief is randon for both possible actions (INCREASE_BID or CHALLENGE)
         beliefs_1.putIfAbsent(s, (float) Math.random());
 
-        System.out.println(this.name + " belief_1: " + beliefs_1.get(s));
+        //System.out.println(this.name + " belief_1: " + beliefs_1.get(s));
 
         if(a == Actions2.INCREASE_BID){
             beliefs_1.put(s, (1 - LEARNING_SPEED) * beliefs_1.get(s) + LEARNING_SPEED);
@@ -83,7 +83,7 @@ public class Player implements Actions, Colours{
             beliefs_1.put(s, (1 - LEARNING_SPEED) * beliefs_1.get(s));
         }
 
-        System.out.println(this.name + " belief_1 updated: " + beliefs_1.get(s));
+        //System.out.println(this.name + " belief_1 updated: " + beliefs_1.get(s));
 
     }
 
@@ -256,14 +256,21 @@ public class Player implements Actions, Colours{
 
         if(a == Actions2.INCREASE_BID && aj == Actions2.INCREASE_BID){
             
-            // maybe it will win
-            // at the end of the day, the higger the bid
-            // the higher the probability of winning when challenging
-            return 0.55f;
+            // The probability of winning if the player increases the bid after the opponent increases the bid
+            // will be simplified to the probability of winning if the player challenges the opponent
+            // when it is the player's turn to play again
+            // unless the probability is 0
+            float oddsChallenge = getReward_2(Actions2.CHALLENGE, null, playerTokenStack, opponentTokenStackSize, bid + 2);
+
+            if(oddsChallenge > 0){
+                return oddsChallenge;
+            }
+            
+            return (float)0.5;
 
         }else if(a == Actions2.INCREASE_BID && aj == Actions2.CHALLENGE){
 
-            // calculate the probability of winning if the player is challenged
+            // calculate the probability of winning if the player is challenged after increasing the bid
             float prob = 1;
             int nRoses = 0;
             Stack<Token> stackAux = (Stack<Token>)playerTokenStack.clone();
@@ -344,10 +351,119 @@ public class Player implements Actions, Colours{
             if(nRoses < bid){
                 // the game does not have enough roses for the opponent to win
                 // the player will win if it challenges the opponent
-                return Float.MAX_VALUE;
+                //prob = 1;
+                return 1;
             }else{
                 return prob;
             }
+
+        }
+
+    }
+
+    private float getReward_2(Actions2 a, Actions2 aj, Stack<Token> playerTokenStack, Stack<Token> opponentTokenStack, int bid){
+
+        if(a == Actions2.INCREASE_BID && aj == Actions2.INCREASE_BID){
+
+            float oddsChallenge = getReward_2(Actions2.CHALLENGE, null, playerTokenStack, opponentTokenStack, bid + 2);
+
+            if(oddsChallenge > 0){
+                return oddsChallenge;
+            }
+            
+            return (float)0.5;
+
+        }else if(a == Actions2.INCREASE_BID && aj == Actions2.CHALLENGE){
+
+            // *** --- ***
+            // Check the player's stack to see if it has enough roses to win
+            int nRoses = 0;
+            Stack<Token> stackAux = (Stack<Token>)playerTokenStack.clone();
+            while(!stackAux.isEmpty()){
+
+                if(stackAux.pop() == Token.ROSE){
+                    nRoses++;
+                }else{
+                    //prob = 0;
+                    return 0;
+                }
+
+                if(nRoses >= bid + 1){
+                    //prob = 1;
+                    return 1;
+                }
+
+            }
+            // *** --- ***
+
+            // *** --- ***
+            // Check the opponent's stack to see if it has enough roses to win
+            stackAux = (Stack<Token>)opponentTokenStack.clone();
+            while(!stackAux.isEmpty()){
+
+                if(stackAux.pop() == Token.ROSE){
+                    nRoses++;
+                }else{
+                    //prob = 0;
+                    return 0;
+                }
+
+                if(nRoses >= bid + 1){
+                    //prob = 1;
+                    return 1;
+                }
+
+            }
+            // *** --- ***
+
+            //prob = 0;
+            return 0;
+            
+        }else{
+
+            // *** --- ***
+            // Check the opponent's stack to see if the opponent has enough roses to win
+            int nRoses = 0;
+            Stack<Token> stackAux = (Stack<Token>)opponentTokenStack.clone();
+            while(!stackAux.isEmpty()){
+
+                if(stackAux.pop() == Token.ROSE){
+                    nRoses++;
+                }else{
+                    //prob = 1;
+                    return 1;
+                }
+
+                if(nRoses >= bid){
+                    //prob = 0;
+                    return 0;
+                }
+
+            }
+            // *** --- ***
+
+            // *** --- ***
+            // Check the player's stack to see if the opponent has enough roses to win
+            stackAux = (Stack<Token>)playerTokenStack.clone();
+            while(!stackAux.isEmpty()){
+
+                if(stackAux.pop() == Token.ROSE){
+                    nRoses++;
+                }else{
+                    //prob = 1;
+                    return 1;
+                }
+
+                if(nRoses >= bid){
+                    //prob = 0;
+                    return 0;
+                }
+
+            }
+            // *** --- ***
+
+            //prob = 0;
+            return 0;
 
         }
 
@@ -454,10 +570,10 @@ public class Player implements Actions, Colours{
                 // *** --- ***
                 // Decide player's behavior (confidence c1 is 1)
                 value_INCREASE_BID = 
-                    getReward_2(Actions2.INCREASE_BID,action_opponent,this.tokenStack,opponentTokenStackSize,bid);
+                    getReward_2(Actions2.INCREASE_BID,action_opponent,this.tokenStack,interpretedStack,bid);
                     
                 value_CHALLENGE = 
-                    getReward_2(Actions2.CHALLENGE,null,this.tokenStack,opponentTokenStackSize,bid);
+                    getReward_2(Actions2.CHALLENGE,null,this.tokenStack,interpretedStack,bid);
 
                 System.out.println(this.name + " value_INCREASE_BID: " + value_INCREASE_BID);
                 System.out.println(this.name + " value_CHALLENGE: " + value_CHALLENGE);
