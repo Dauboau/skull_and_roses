@@ -1,6 +1,7 @@
 skull_and_roses/MenuController.class
 skull_and_roses/Player$Type.class
 skull_and_roses/Token.class
+skull_and_roses/Game$1.class
 skull_and_roses/Actions$Actions3.class
 skull_and_roses/Colours$Colour.class
 module-info.class
