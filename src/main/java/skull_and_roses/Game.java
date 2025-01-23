@@ -5,7 +5,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import skull_and_roses.Actions.Actions1;
-import skull_and_roses.Actions.Actions2;
 
 public class Game {
 
