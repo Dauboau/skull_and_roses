@@ -94,5 +94,10 @@
             </Button>
          </children>
       </GridPane>
+      <Label fx:id="instructionsLabel" text="Instructions: click or press enter" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="4">
+         <font>
+            <Font name="SF Pro Text Regular" size="18.0" />
+         </font>
+      </Label>
    </children>
 </GridPane>

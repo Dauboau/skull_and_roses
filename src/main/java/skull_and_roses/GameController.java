@@ -7,6 +7,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 
 public class GameController {
@@ -36,6 +37,9 @@ public class GameController {
     private Label p2;
 
     @FXML
+    private Label instructionsLabel;
+
+    @FXML
     private void menu() throws IOException {
         App.setRoot("menu");
     }
@@ -48,11 +52,22 @@ public class GameController {
     public void initialize() {
         executor.execute(App.game.start());
         App.gameController = this;
+
+        App.scene.addEventHandler(KeyEvent.KEY_TYPED, event -> {
+            String character = event.getCharacter();
+            tick_on_typed(character);
+        });
+
     }
 
     @FXML
     public void tick_on_click(){
         App.game.tick();
+    }
+
+    @FXML
+    public void tick_on_typed(String character){
+        App.game.tick_keyboard(character);
     }
 
     @FXML
@@ -74,6 +89,12 @@ public class GameController {
             stageLabel.setText("Stage: " + stage);
             playerLabel.setText("Player: " + player);
             actionLabel.setText(action);
+        });
+    }
+
+    public void updateInstructions(String instructions){
+        Platform.runLater(() -> {
+            instructionsLabel.setText(instructions);
         });
     }
 

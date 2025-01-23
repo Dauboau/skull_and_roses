@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Stack;
@@ -32,6 +33,8 @@ public class Player implements Actions, Colours{
     public Colour colour;
     public Type type;
     public int nWins = 0;
+
+    public String keyboardAction = "";
 
     /**
      * Beliefs_0 about future behavior of the opponent based on the state.
@@ -187,59 +190,95 @@ public class Player implements Actions, Colours{
 
     public Actions1 play_1(int opponentTokenStackSize) {
 
-        if(this.tokenStack.size() >= 1 && opponentTokenStackSize >= 1){
+        switch(type){
 
-            // If there are no tokens left, the player must bid
-            if(this.nRoses == 0 && this.nSkulls == 0){
+            case ZERO:
+            case ONE:
 
-                return bid();
+                if(this.tokenStack.size() >= 1 && opponentTokenStackSize >= 1){
 
-            }else if(this.nRoses == 0){
-                
-                // If there are no roses left, the player should bid or play a skull token (randonly)
-                int randon = ThreadLocalRandom.current().nextInt(0, this.nSkulls + 1);
-                if(randon == 0){
-                    return bid();
+                    // If there are no tokens left, the player must bid
+                    if(this.nRoses == 0 && this.nSkulls == 0){
+        
+                        return bid();
+        
+                    }else if(this.nRoses == 0){
+                        
+                        // If there are no roses left, the player should bid or play a skull token (randonly)
+                        int randon = ThreadLocalRandom.current().nextInt(0, this.nSkulls + 1);
+                        if(randon == 0){
+                            return bid();
+                        }else{
+                            return place_skull();
+                        }
+        
+                    }else if(this.nSkulls == 0){
+                        
+                        // If there are no skulls left, the player should bid or play a flower token (randonly)
+                        // It may bid unless the last token is a skull
+                        int randon = ThreadLocalRandom.current().nextInt(0, this.nRoses + 1);
+                        if(randon == 0 && this.tokenStack.peek() != Token.SKULL){ // rationality
+                            return bid();
+                        }else{
+                            return place_flower();
+                        }
+        
+                    }else{
+        
+                        // Randomly choose an action with equal probability
+                        int randon = ThreadLocalRandom.current().nextInt(0, this.nRoses + this.nSkulls + 1);
+                        if(randon == 0){
+                            return bid();
+                        }else if(randon == 1){
+                            return place_skull();
+                        }else{
+                            return place_flower();
+                        }
+        
+                    }
+        
                 }else{
-                    return place_skull();
+                    
+                    // If the player has not yet played a token, it must do so (randonly)
+                    int randon = ThreadLocalRandom.current().nextInt(0, N_ROSES + N_SKULLS);
+                    if(randon == 0){
+                        return place_skull();
+                    }else{
+                        return place_flower();
+                    }
+        
                 }
 
-            }else if(this.nSkulls == 0){
-                
-                // If there are no skulls left, the player should bid or play a flower token (randonly)
-                // It may bid unless the last token is a skull
-                int randon = ThreadLocalRandom.current().nextInt(0, this.nRoses + 1);
-                if(randon == 0 && this.tokenStack.peek() != Token.SKULL){ // rationality
-                    return bid();
-                }else{
-                    return place_flower();
+            case PLAYER:
+
+                Actions1 action;
+
+                while(true){
+
+                    action = Actions.key_to_Actions1(
+                        App.game.wait_action(Actions.Keyboard_Actions1)
+                    );
+
+                    if(action == Actions1.PLACE_SKULL && this.nSkulls > 0){
+                        return place_skull();
+                    }
+
+                    if(action == Actions1.PLACE_FLOWER && this.nRoses > 0){
+                        return place_flower();
+                    }
+
+                    if(action == Actions1.BID){
+                        return bid();
+                    }
+
                 }
 
-            }else{
-
-                // Randomly choose an action with equal probability
-                int randon = ThreadLocalRandom.current().nextInt(0, this.nRoses + this.nSkulls + 1);
-                if(randon == 0){
-                    return bid();
-                }else if(randon == 1){
-                    return place_skull();
-                }else{
-                    return place_flower();
-                }
-
-            }
-
-        }else{
-            
-            // If the player has not yet played a token, it must do so (randonly)
-            int randon = ThreadLocalRandom.current().nextInt(0, N_ROSES + N_SKULLS);
-            if(randon == 0){
-                return place_skull();
-            }else{
-                return place_flower();
-            }
+            default:
+                break;
 
         }
+
+        return null;
 
     }
 
@@ -584,6 +623,22 @@ public class Player implements Actions, Colours{
                     return challenge();
                 }
                 // *** --- ***
+
+            case PLAYER:
+
+                Actions2 action = Actions.key_to_Actions2(
+                    App.game.wait_action(Actions.Keyboard_Actions2)
+                );
+
+                if(action == Actions2.INCREASE_BID){
+                    return increase_bid();
+                }
+
+                if(action == Actions2.CHALLENGE){
+                    return challenge();
+                }
+
+                break;
 
         
             default:
