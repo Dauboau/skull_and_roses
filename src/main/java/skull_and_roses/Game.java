@@ -12,7 +12,7 @@ public class Game {
         ONE_vs_ZERO, ZERO_vs_ZERO, PLAYER_vs_ONE, PLAYER_vs_ZERO
     }
 
-    public static final boolean AUTO_MODE = true;
+    public static final boolean AUTO_MODE = false;
     public static final int N_ROUNDS = 1000;
 
     // 2 players setup
